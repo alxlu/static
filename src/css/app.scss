@@ -1,0 +1,22 @@
+html {
+	touch-action:none;
+	height: 100%;
+	width: 100%;
+}
+
+body {
+  height: 100%;
+  width: 100%;
+  touch-action: pan-y;
+  overflow: auto;
+}
+
+
+#tall {
+  position: absolute;
+  height: 1000px;
+  background-color: red;
+  touch-action: auto;
+  color: gray;
+  width: 100%;
+}
