@@ -5,7 +5,7 @@ Copyright (c) Microsoft Corporation. All rights reserved
 <!DOCTYPE html>
 <html>
 <head>
-    <title>WinJS Hub sample - Orientations</title>
+    <title>WinJS Hub sample - Navigate within the Hub</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/winjs/4.0.1/css/ui-dark.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/winjs/4.0.1/js/base.js"></script>
@@ -13,16 +13,16 @@ Copyright (c) Microsoft Corporation. All rights reserved
     <script>
         WinJS.Namespace.define('Sample', {
             songs: new WinJS.Binding.List([
-                { length: '4:33' },
-                { length: '3:54' },
-                { length: '5:14' },
-                { length: '4:51' },
-                { length: '3:47' },
-                { length: '3:25' },
-                { length: '5:01' },
-                { length: '3:36' },
-                { length: '3:52' },
-                { length: '2:56' }
+                { length: '4:33', song: 'Song 1', album: 'Album 1' },
+                { length: '3:54', song: 'Song 2', album: 'Album 2' },
+                { length: '5:14', song: 'Song 3', album: 'Album 3' },
+                { length: '4:51', song: 'Song 4', album: 'Album 4' },
+                { length: '3:47', song: 'Song 5', album: 'Album 5' },
+                { length: '3:25', song: 'Song 6', album: 'Album 6' },
+                { length: '5:01', song: 'Song 7', album: 'Album 7' },
+                { length: '3:36', song: 'Song 8', album: 'Album 8' },
+                { length: '3:52', song: 'Song 9', album: 'Album 9' },
+                { length: '2:56', song: 'Song 10', album: 'Album 10' }
             ]),
             albums: new WinJS.Binding.List([
                 { title: 'Album 1' },
@@ -37,22 +37,15 @@ Copyright (c) Microsoft Corporation. All rights reserved
                 { title: 'Album 10' }
             ])
         });
-        Sample.songs.forEach(function (value, index) {
-            var i = index + 1;
-            value.song = 'Song ' + i;
-            value.album = 'Album ' + i;
-        });
 
         function init() {
             WinJS.UI.processAll().then(function() {
-                var toggle = document.querySelector('#toggleOrientationButton');
-                toggle.addEventListener('click', function () {
+                var jumpSection = document.querySelector('#jumpSection');
+                jumpSection.addEventListener('change', function () {
                     var hub = document.querySelector('#hub');
-                    WinJS.Utilities.removeClass(hub, hub.winControl.orientation);
-                    hub.winControl.orientation = (hub.winControl.orientation == 'vertical') ? 'horizontal' : 'vertical';
-                    WinJS.Utilities.addClass(hub, hub.winControl.orientation);
-                    var listView = document.querySelector('#listView');
-                    listView.winControl.forceLayout();
+                    hub.winControl.sectionOnScreen = this.value;
+                    var scrollPosition = document.querySelector('#scrollPosition');
+                    scrollPosition.innerText = hub.winControl.scrollPosition;
                 });
             });
         }
@@ -60,9 +53,13 @@ Copyright (c) Microsoft Corporation. All rights reserved
         WinJS.Utilities.ready(init);
     </script>
     <style type="text/css">
+        body {
+            min-width: 320px;
+        }
+
         #hub {
             min-width: 320px;
-            height: calc(100% - 32px);
+            height: calc(100% - 48px);
         }
 
         .songs {
@@ -113,13 +110,6 @@ Copyright (c) Microsoft Corporation. All rights reserved
 
         #listView {
             min-width: 300px;
-        }
-
-        #hub.horizontal #listView {
-            width: 500px;
-        }
-
-        #hub.vertical #listView {
             height: auto;
         }
 
@@ -179,11 +169,21 @@ Copyright (c) Microsoft Corporation. All rights reserved
         .win-rating .win-star.win-average.win-full.win-disabled {
             color: #FFF;
         }
+
+        #jumpPosition {
+            width: 50px;
+        }
     </style>
 </head>
 <body class="win-type-body">
-    <button class="win-button" id="toggleOrientationButton">Toggle orientation</button>
-    <div id="hub" class="vertical" data-win-control="WinJS.UI.Hub" data-win-options="{orientation: 'vertical'}">
+    <select id="jumpSection" class="win-dropdown">
+        <option>Jump to a Section</option>
+        <option value="0">Songs</option>
+        <option value="1">Albums</option>
+        <option value="2">Reviews</option>
+    </select>
+    <span>Scroll position: <span id="scrollPosition">0</span>px</span>
+    <div id="hub" data-win-control="WinJS.UI.Hub" data-win-options="{orientation: 'vertical'}">
         <div class="songs" data-win-control="WinJS.UI.HubSection" data-win-options="{header: 'Songs', isHeaderStatic: true}">
             <div class="songRow headers">
                 <div class="play"></div>

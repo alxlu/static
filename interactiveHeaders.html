@@ -5,7 +5,7 @@ Copyright (c) Microsoft Corporation. All rights reserved
 <!DOCTYPE html>
 <html>
 <head>
-    <title>WinJS Hub sample - Orientations</title>
+    <title>WinJS Hub sample - Interactive headers</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/winjs/4.0.1/css/ui-dark.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/winjs/4.0.1/js/base.js"></script>
@@ -43,26 +43,44 @@ Copyright (c) Microsoft Corporation. All rights reserved
             value.album = 'Album ' + i;
         });
 
-        function init() {
-            WinJS.UI.processAll().then(function() {
-                var toggle = document.querySelector('#toggleOrientationButton');
-                toggle.addEventListener('click', function () {
-                    var hub = document.querySelector('#hub');
-                    WinJS.Utilities.removeClass(hub, hub.winControl.orientation);
-                    hub.winControl.orientation = (hub.winControl.orientation == 'vertical') ? 'horizontal' : 'vertical';
-                    WinJS.Utilities.addClass(hub, hub.winControl.orientation);
-                    var listView = document.querySelector('#listView');
-                    listView.winControl.forceLayout();
-                });
-            });
-        }
+        WinJS.UI.Pages.define('/interactiveHeaders.html', {
+            // This function is called whenever a user navigates to this page.
+            ready: function (element, options) {
+                this._hub = element.querySelector('#hub').winControl;
+                this._onHeaderInvokedBound = this.onHeaderInvoked.bind(this);
+                window.addEventListener('headerinvoked', this._onHeaderInvokedBound);
 
-        WinJS.Utilities.ready(init);
+                // Reset the scroll position from the history state.
+                var oldScrollPosition = WinJS.Navigation.state && WinJS.Navigation.state.oldScrollPosition;
+                if (oldScrollPosition) {
+                    this._hub.scrollPosition = oldScrollPosition;
+                }
+            },
+            // Navigate to deeper levels by invoking interactive headers
+            onHeaderInvoked: function (e) {
+                var index = e.detail.index;
+                var section = e.detail.section;
+                var hub = this._hub;
+
+                // Store the scroll position so it can be retrieved if the user comes "back" to this page.
+                WinJS.Navigation.state = WinJS.Navigation.state || {};
+                WinJS.Navigation.state.oldScrollPosition = hub.scrollPosition;
+
+                WinJS.Navigation.navigate('/pages/hub/newpage.html', { section: hub.sections.getAt(index).header });
+            },
+            unload: function () {
+                window.removeEventListener('headerinvoked', this._onHeaderInvokedBound);
+            }
+        });
     </script>
     <style type="text/css">
+        body {
+            min-width: 320px;
+        }
+
         #hub {
             min-width: 320px;
-            height: calc(100% - 32px);
+            height: calc(100% - 20px);
         }
 
         .songs {
@@ -113,14 +131,7 @@ Copyright (c) Microsoft Corporation. All rights reserved
 
         #listView {
             min-width: 300px;
-        }
-
-        #hub.horizontal #listView {
             width: 500px;
-        }
-
-        #hub.vertical #listView {
-            height: auto;
         }
 
         .album {
@@ -179,12 +190,16 @@ Copyright (c) Microsoft Corporation. All rights reserved
         .win-rating .win-star.win-average.win-full.win-disabled {
             color: #FFF;
         }
+
+        #status {
+            padding-left: 10px;
+        }
     </style>
 </head>
 <body class="win-type-body">
-    <button class="win-button" id="toggleOrientationButton">Toggle orientation</button>
-    <div id="hub" class="vertical" data-win-control="WinJS.UI.Hub" data-win-options="{orientation: 'vertical'}">
-        <div class="songs" data-win-control="WinJS.UI.HubSection" data-win-options="{header: 'Songs', isHeaderStatic: true}">
+    <span id="status"></span>
+    <div id="hub" data-win-control="WinJS.UI.Hub" data-win-options="{orientation: 'horizontal'}">
+        <div class="songs" data-win-control="WinJS.UI.HubSection" data-win-options="{header: 'Songs'}">
             <div class="songRow headers">
                 <div class="play"></div>
                 <div class="song">song</div>
